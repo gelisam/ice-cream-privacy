@@ -103,6 +103,16 @@ computeStats infos
 -- print stats --
 -----------------
 
+printPersonInfo
+  :: PersonInfo
+  -> IO ()
+printPersonInfo (PersonInfo {..}) = do
+  printf "%2d %c %c %c\n"
+    age
+    (if gender == Female then 'F' else 'M')
+    (if likesIceCream then 'I' else '-')
+    (if isMarried then 'M' else '-')
+
 printStats
   :: String
   -> Stats
@@ -134,3 +144,8 @@ main = do
       $ computeStats
       $ filter predicate
       $ realData
+
+  putStrLn "---"
+
+  forM_ realData $ \personInfo -> do
+    printPersonInfo personInfo
