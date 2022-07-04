@@ -1,7 +1,9 @@
+{-# LANGUAGE RecordWildCards #-}
 module Main where
 
 import Data.Foldable
 import Data.Ratio
+import Text.Printf
 
 
 ---------------
@@ -101,14 +103,25 @@ computeStats infos
 -- print stats --
 -----------------
 
+printStats
+  :: String
+  -> Stats
+  -> IO ()
+printStats name (Stats {..}) = do
+  printf "%2s * %2d  %2.2f | %2.2f\n"
+    name
+    count
+    (realToFrac medianAge :: Double)
+    (realToFrac meanAge :: Double)
+
 predicates
   :: [(String, PersonInfo -> Bool)]
 predicates
-  = [ ("all", \_ -> True)
-    , ("women", \x -> gender x == Female)
-    , ("ice-cream", likesIceCream)
-    , ("married", isMarried)
-    , ( "women-who-like-ice-cream"
+  = [ ("", \_ -> True)
+    , ("F", \x -> gender x == Female)
+    , ("I", likesIceCream)
+    , ("M", isMarried)
+    , ( "FI"
       , \x -> gender x == Female && likesIceCream x
       )
     ]
@@ -117,8 +130,7 @@ main
   :: IO ()
 main = do
   forM_ predicates $ \(groupName, predicate) -> do
-    putStrLn groupName
-    print
+    printStats groupName
       $ computeStats
       $ filter predicate
       $ realData
