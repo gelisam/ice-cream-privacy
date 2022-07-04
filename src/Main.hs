@@ -4,6 +4,10 @@ import Data.Foldable
 import Data.Ratio
 
 
+---------------
+-- real data --
+---------------
+
 data Gender
   = Male
   | Female
@@ -21,16 +25,22 @@ data PersonInfo = PersonInfo
   }
   deriving Show
 
-data Stats = Stats
-  { count
-      :: Int
-  , medianAge
-      :: Ratio Int
-  , meanAge
-      :: Ratio Int
-  }
-  deriving Show
+realData
+  :: [PersonInfo]
+realData
+  = [ PersonInfo 8 Female True False
+    , PersonInfo 18 Male False False
+    , PersonInfo 24 Female False False
+    , PersonInfo 30 Male False True
+    , PersonInfo 36 Female True True
+    , PersonInfo 66 Female True True
+    , PersonInfo 84 Male True True
+    ]
 
+
+-------------------
+-- compute stats --
+-------------------
 
 -- traverses the list twice, ok for short and reused lists
 mean
@@ -63,6 +73,16 @@ median xs
   where
     n = length xs
 
+data Stats = Stats
+  { count
+      :: Int
+  , medianAge
+      :: Ratio Int
+  , meanAge
+      :: Ratio Int
+  }
+  deriving Show
+
 computeStats
   :: (PersonInfo -> Bool)
   -> [PersonInfo]
@@ -84,18 +104,6 @@ computeStats p allData
       $ filter p
       $ allData
 
-realData
-  :: [PersonInfo]
-realData
-  = [ PersonInfo 8 Female True False
-    , PersonInfo 18 Male False False
-    , PersonInfo 24 Female False False
-    , PersonInfo 30 Male False True
-    , PersonInfo 36 Female True True
-    , PersonInfo 66 Female True True
-    , PersonInfo 84 Male True True
-    ]
-
 predicates
   :: [(String, PersonInfo -> Bool)]
 predicates
@@ -107,6 +115,11 @@ predicates
       , \x -> gender x == Female && likesIceCream x
       )
     ]
+
+
+-----------------
+-- print stats --
+-----------------
 
 main
   :: IO ()
