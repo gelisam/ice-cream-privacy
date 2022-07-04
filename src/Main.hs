@@ -84,25 +84,22 @@ data Stats = Stats
   deriving Show
 
 computeStats
-  :: (PersonInfo -> Bool)
-  -> [PersonInfo]
+  :: [PersonInfo]
   -> Stats
-computeStats p allData
+computeStats infos
   = Stats
       { count
-          = length matchingAges
+          = length infos
       , medianAge
-          = median matchingAges
+          = median (fmap age infos)
       , meanAge
-          = mean matchingAges
+          = mean (fmap age infos)
       }
-  where
-    matchingAges
-      :: [Int]
-    matchingAges
-      = fmap age
-      $ filter p
-      $ allData
+
+
+-----------------
+-- print stats --
+-----------------
 
 predicates
   :: [(String, PersonInfo -> Bool)]
@@ -116,14 +113,12 @@ predicates
       )
     ]
 
-
------------------
--- print stats --
------------------
-
 main
   :: IO ()
 main = do
   forM_ predicates $ \(groupName, predicate) -> do
     putStrLn groupName
-    print $ computeStats predicate realData
+    print
+      $ computeStats
+      $ filter predicate
+      $ realData
