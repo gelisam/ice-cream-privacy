@@ -6,9 +6,9 @@ import Data.Ratio
 import Text.Printf
 
 
----------------
--- real data --
----------------
+------------------
+-- real dataset --
+------------------
 
 data Gender
   = Male
@@ -27,9 +27,9 @@ data PersonInfo = PersonInfo
   }
   deriving Show
 
-realData
+realDataset
   :: [PersonInfo]
-realData
+realDataset
   = [ PersonInfo 8 Female True False
     , PersonInfo 18 Male False False
     , PersonInfo 24 Female False False
@@ -83,7 +83,7 @@ data Stats = Stats
   , meanAge
       :: Ratio Int
   }
-  deriving Show
+  deriving (Eq, Show)
 
 computeStats
   :: [PersonInfo]
@@ -97,6 +97,29 @@ computeStats infos
       , meanAge
           = mean (fmap age infos)
       }
+
+
+------------------------
+-- brute force attack --
+------------------------
+
+bruteForce
+  :: Eq b
+  => (a -> b)
+  -> b
+  -> [a]
+  -> [a]
+bruteForce computeB actualB
+  = filter (\a -> computeB a == actualB)
+
+possiblePersonInfos
+  :: [PersonInfo]
+possiblePersonInfos
+    = PersonInfo
+  <$> [0..120]
+  <*> [Male,Female]
+  <*> [False,True]
+  <*> [False,True]
 
 
 -----------------
@@ -139,13 +162,55 @@ predicates
 main
   :: IO ()
 main = do
-  forM_ predicates $ \(groupName, predicate) -> do
-    printStats groupName
-      $ computeStats
-      $ filter predicate
-      $ realData
+  let computeGroupStats
+        :: [PersonInfo]
+        -> [(String, PersonInfo -> Bool, Stats)]
+      computeGroupStats dataset
+        = [ ( groupName
+            , predicate
+            , computeStats
+            $ filter predicate
+            $ dataset
+            )
+          | (groupName, predicate) <- predicates
+          ]
+      publishedGroupStats
+        :: [(String, PersonInfo -> Bool, Stats)]
+      publishedGroupStats
+        = computeGroupStats realDataset
+  putStrLn "Given the following published stats:"
+  forM_ publishedGroupStats $ \(groupName, _, stats) -> do
+    printStats groupName stats
 
-  putStrLn "---"
+  putStrLn "==="
 
-  forM_ realData $ \personInfo -> do
-    printPersonInfo personInfo
+  -- brute forcing all 7 people would be untractable, demonstrate the idea
+  -- by brute forcing the first 2
+  let knownTail
+        :: [PersonInfo]
+      knownTail
+        = drop 2 realDataset
+      possibleDatasets
+        :: [[PersonInfo]]
+      possibleDatasets = do
+        person1 <- possiblePersonInfos
+        person2 <- possiblePersonInfos
+        pure (person1 : person2 : knownTail)
+      attackableSurface
+        :: [(String, PersonInfo -> Bool, Stats)]
+        -> [Stats]
+      attackableSurface
+        = fmap (\(_,_,stats) -> stats)
+      plausibleDatasets
+        :: [[PersonInfo]]
+      plausibleDatasets
+        = bruteForce
+            (attackableSurface . computeGroupStats)
+            (attackableSurface publishedGroupStats)
+            possibleDatasets
+  putStrLn "The attacker can infer that the real dataset is one"
+  putStrLn "of the following:"
+  forM_ plausibleDatasets $ \plausibleDataset -> do
+    putStrLn "---"
+    forM_ plausibleDataset $ \personInfo -> do
+      printPersonInfo personInfo
