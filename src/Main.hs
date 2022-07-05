@@ -1,7 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 module Main where
 
+import Data.Containers.ListUtils (nubOrd)
 import Data.Foldable
+import Data.List (sort)
 import Data.Ratio
 import Text.Printf
 
@@ -25,7 +27,7 @@ data PersonInfo = PersonInfo
   , isMarried
       :: Bool
   }
-  deriving Show
+  deriving (Eq, Ord, Show)
 
 realDataset
   :: [PersonInfo]
@@ -204,7 +206,9 @@ main = do
       plausibleDatasets
         :: [[PersonInfo]]
       plausibleDatasets
-        = bruteForce
+        = nubOrd
+        $ fmap sort
+        $ bruteForce
             (attackableSurface . computeGroupStats)
             (attackableSurface publishedGroupStats)
             possibleDatasets
