@@ -143,7 +143,7 @@ printStats
   -> Stats
   -> IO ()
 printStats name (Stats {..}) = do
-  printf "%2s * %2d  %2.2f | %2.2f\n"
+  printf "%2s * %1d  %2.2f | %2.2f\n"
     name
     count
     (realToFrac medianAge :: Double)
